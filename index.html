@@ -172,7 +172,7 @@ color:#777;
 class="search"
 id="search"
 placeholder="🔎 ابحث عن منتج..."
-oninput="displayProducts()">
+oninput="displayProducts">
 
 <div class="products" id="products">
 
@@ -287,13 +287,9 @@ onclick="submitOrder()">
 
 
 
-<!-- Supabase -->
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-
 <script>
-
 
 const SUPABASE_URL =
 'https://sjxjhyqayhscbqqniemp.supabase.co';
@@ -308,21 +304,17 @@ SUPABASE_KEY
 );
 
 
-
 let products = [];
 
 let selectedProduct = null;
 
 
-
 async function loadProducts(){
 
-const { data, error } = await supabaseClient
-
+const { data, error } =
+await supabaseClient
 .from("products")
-
 .select("*")
-
 .order("created_at", {
 ascending:false
 });
@@ -339,13 +331,11 @@ return;
 
 }
 
-
 products = data || [];
 
 displayProducts();
 
 }
-
 
 
 function displayProducts(){
@@ -412,15 +402,14 @@ html ||
 }
 
 
-
 async function addProduct(){
-alert("الزر يعمل");
+
 let name =
 document
 .getElementById("productName")
 .value
 .trim();
-alert("الاسم: " + name);
+
 
 let price =
 Number(
@@ -452,11 +441,10 @@ return;
 
 }
 
-alert("وصلنا إلى مرحلة حفظ المنتج");
-const { error } = await supabaseClient
 
+const { error } =
+await supabaseClient
 .from("products")
-
 .insert({
 
 name:name,
@@ -477,11 +465,14 @@ if(error){
 
 console.error(error);
 
-alert("حدث خطأ أثناء إضافة المنتج.");
+alert(
+"خطأ Supabase:\n" +
+error.message
+);
 
 return;
 
-
+}
 
 
 alert("تمت إضافة المنتج بنجاح.");
@@ -501,7 +492,6 @@ await loadProducts();
 showPage("home");
 
 }
-
 
 
 function orderProduct(index){
@@ -524,7 +514,6 @@ Number(selectedProduct.price).toLocaleString() +
 showPage("order");
 
 }
-
 
 
 async function submitOrder(){
@@ -559,9 +548,11 @@ document
 .trim();
 
 
-if(!buyerName ||
+if(
+!buyerName ||
 !buyerPhone ||
-!buyerAddress){
+!buyerAddress
+){
 
 alert("يرجى ملء جميع المعلومات.");
 
@@ -580,9 +571,7 @@ totalPrice * 0.05;
 
 const { error } =
 await supabaseClient
-
 .from("orders")
-
 .insert({
 
 product_id:
@@ -613,7 +602,8 @@ if(error){
 console.error(error);
 
 alert(
-"حدث خطأ أثناء تسجيل الطلب."
+"حدث خطأ أثناء تسجيل الطلب:\n" +
+error.message
 );
 
 return;
@@ -623,13 +613,13 @@ return;
 
 alert(
 
-"تم تسجيل الطلب بنجاح!\\n\\n" +
+"تم تسجيل الطلب بنجاح!\n\n" +
 
 "سعر المنتج: " +
 
 totalPrice.toLocaleString() +
 
-" دج\\n" +
+" دج\n" +
 
 "عمولة سوقي DZ: " +
 
@@ -652,7 +642,6 @@ selectedProduct = null;
 showPage("home");
 
 }
-
 
 
 function showPage(page){
@@ -684,12 +673,9 @@ displayProducts();
 }
 
 
-
 loadProducts();
 
-
 </script>
-
 
 </body>
 
