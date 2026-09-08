@@ -334,7 +334,7 @@ if(error){
 console.error(error);
 
 document.getElementById("products").innerHTML =
-"<p>حدث خطأ أثناء تحميل المنتجات.</p>";
+"<p>alert("خطأ Supabase: " + error.message);.</p>";
 
 return;
 
