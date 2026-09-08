@@ -298,9 +298,8 @@ onclick="submitOrder()">
 const SUPABASE_URL =
 'https://sjxjhyqayhscbqqniemp.supabase.co';
 
-
-sb_publishable_nTr9xyFihJNfs91HVbnHCg_lqFc6x_n
-
+const SUPABASE_KEY =
+'sb_publishable_nTr9xyFihJNfs91HVbnHCg_lqFc6x_n';
 
 const supabaseClient =
 supabase.createClient(
@@ -334,7 +333,7 @@ if(error){
 console.error(error);
 
 document.getElementById("products").innerHTML =
-"<p>alert(alert("حدث خطأ أثناء إضافة المنتج."); );.</p>";
+"<p>حدث خطأ أثناء تحميل المنتجات.</p>";
 
 return;
 
