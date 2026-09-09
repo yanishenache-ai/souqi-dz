@@ -109,6 +109,10 @@ background:#25D366;
 background:#2563eb;
 }
 
+.logout{
+background:#dc2626;
+}
+
 .form{
 background:white;
 padding:20px;
@@ -128,6 +132,14 @@ font-size:15px;
 
 .hidden{
 display:none;
+}
+
+.user-box{
+background:#e5e7eb;
+color:#111827;
+padding:10px;
+border-radius:8px;
+margin-top:10px;
 }
 
 footer{
@@ -158,11 +170,21 @@ color:#777;
 أضف منتجًا
 </button>
 
+<button onclick="showPage('account')">
+حساب البائع
+</button>
+
 </nav>
+
+<div id="userBox"></div>
 
 </header>
 
+
 <div class="container">
+
+
+<!-- المنتجات -->
 
 <section id="home">
 
@@ -183,11 +205,15 @@ oninput="displayProducts()">
 </section>
 
 
+<!-- إضافة منتج -->
+
 <section id="add" class="hidden">
 
 <h2>إضافة منتج</h2>
 
 <div class="form">
+
+<p id="sellerStatus"></p>
 
 <label>اسم المنتج</label>
 
@@ -218,14 +244,6 @@ id="productDescription"
 placeholder="اكتب وصفًا مختصرًا"></textarea>
 
 
-<label>رقم هاتف البائع</label>
-
-<input
-id="sellerPhone"
-type="tel"
-placeholder="مثال: 0550123456">
-
-
 <button
 class="btn"
 onclick="addProduct()">
@@ -238,6 +256,8 @@ onclick="addProduct()">
 
 </section>
 
+
+<!-- الطلب -->
 
 <section id="order" class="hidden">
 
@@ -281,6 +301,124 @@ onclick="submitOrder()">
 
 </section>
 
+
+<!-- حساب البائع -->
+
+<section id="account" class="hidden">
+
+<h2>حساب البائع</h2>
+
+
+<!-- تسجيل -->
+
+<div
+class="form"
+id="signupBox">
+
+<h3>إنشاء حساب بائع</h3>
+
+<label>اسمك</label>
+
+<input
+id="sellerName"
+placeholder="اسم البائع">
+
+
+<label>رقم الهاتف</label>
+
+<input
+id="sellerPhone"
+type="tel"
+placeholder="مثال: 0550123456">
+
+
+<label>البريد الإلكتروني</label>
+
+<input
+id="sellerEmail"
+type="email"
+placeholder="example@gmail.com">
+
+
+<label>كلمة المرور</label>
+
+<input
+id="sellerPassword"
+type="password"
+placeholder="كلمة المرور">
+
+
+<button
+class="btn"
+onclick="signupSeller()">
+
+إنشاء الحساب
+
+</button>
+
+</div>
+
+
+<br>
+
+
+<!-- تسجيل الدخول -->
+
+<div
+class="form"
+id="loginBox">
+
+<h3>تسجيل الدخول</h3>
+
+<label>البريد الإلكتروني</label>
+
+<input
+id="loginEmail"
+type="email"
+placeholder="البريد الإلكتروني">
+
+
+<label>كلمة المرور</label>
+
+<input
+id="loginPassword"
+type="password"
+placeholder="كلمة المرور">
+
+
+<button
+class="btn"
+onclick="loginSeller()">
+
+تسجيل الدخول
+
+</button>
+
+</div>
+
+
+<!-- الحساب بعد تسجيل الدخول -->
+
+<div
+class="form hidden"
+id="loggedBox">
+
+<h3>👤 حسابك</h3>
+
+<p id="loggedInfo"></p>
+
+<button
+class="btn logout"
+onclick="logoutSeller()">
+
+تسجيل الخروج
+
+</button>
+
+</div>
+
+</section>
+
 </div>
 
 
@@ -312,6 +450,12 @@ let products = [];
 
 let selectedProduct = null;
 
+let currentSeller = null;
+
+
+/* =========================
+   تحميل المنتجات
+========================= */
 
 async function loadProducts(){
 
@@ -341,6 +485,10 @@ displayProducts();
 
 }
 
+
+/* =========================
+   عرض المنتجات
+========================= */
 
 function displayProducts(){
 
@@ -406,7 +554,357 @@ html ||
 }
 
 
+/* =========================
+   إنشاء حساب البائع
+========================= */
+
+async function signupSeller(){
+
+let name =
+document
+.getElementById("sellerName")
+.value
+.trim();
+
+let phone =
+document
+.getElementById("sellerPhone")
+.value
+.trim();
+
+let email =
+document
+.getElementById("sellerEmail")
+.value
+.trim();
+
+let password =
+document
+.getElementById("sellerPassword")
+.value;
+
+
+if(!name || !phone || !email || !password){
+
+alert("يرجى ملء جميع المعلومات.");
+
+return;
+
+}
+
+
+const { data, error } =
+await supabaseClient.auth.signUp({
+
+email:email,
+
+password:password
+
+});
+
+
+if(error){
+
+alert(
+"خطأ أثناء إنشاء الحساب:\n" +
+error.message
+);
+
+return;
+
+}
+
+
+if(!data.user){
+
+alert("تعذر إنشاء الحساب.");
+
+return;
+
+}
+
+
+/* حفظ معلومات البائع */
+
+const { error: sellerError } =
+await supabaseClient
+.from("sellers")
+.insert({
+
+name:name,
+
+phone:phone,
+
+email:email,
+
+auth_user_id:data.user.id
+
+});
+
+
+if(sellerError){
+
+console.error(sellerError);
+
+alert(
+"تم إنشاء حساب الدخول، لكن حدث خطأ في حفظ بيانات البائع:\n" +
+sellerError.message
+);
+
+return;
+
+}
+
+
+currentSeller = {
+
+id:data.user.id,
+
+name:name,
+
+phone:phone,
+
+email:email
+
+};
+
+
+updateSellerUI();
+
+alert(
+"تم إنشاء حساب البائع بنجاح."
+);
+
+showPage("add");
+
+}
+
+
+/* =========================
+   تسجيل الدخول
+========================= */
+
+async function loginSeller(){
+
+let email =
+document
+.getElementById("loginEmail")
+.value
+.trim();
+
+let password =
+document
+.getElementById("loginPassword")
+.value;
+
+
+if(!email || !password){
+
+alert("أدخل البريد الإلكتروني وكلمة المرور.");
+
+return;
+
+}
+
+
+const { data, error } =
+await supabaseClient.auth.signInWithPassword({
+
+email:email,
+
+password:password
+
+});
+
+
+if(error){
+
+alert(
+"خطأ في تسجيل الدخول:\n" +
+error.message
+);
+
+return;
+
+}
+
+
+await loadCurrentSeller();
+
+alert("تم تسجيل الدخول بنجاح.");
+
+showPage("add");
+
+}
+
+
+/* =========================
+   تحميل بيانات البائع
+========================= */
+
+async function loadCurrentSeller(){
+
+const { data } =
+await supabaseClient.auth.getUser();
+
+
+if(!data.user){
+
+currentSeller = null;
+
+updateSellerUI();
+
+return;
+
+}
+
+
+const { data: seller } =
+await supabaseClient
+.from("sellers")
+.select("*")
+.eq("auth_user_id", data.user.id)
+.single();
+
+
+if(seller){
+
+currentSeller = seller;
+
+}else{
+
+currentSeller = null;
+
+}
+
+
+updateSellerUI();
+
+}
+
+
+/* =========================
+   تحديث واجهة الحساب
+========================= */
+
+function updateSellerUI(){
+
+let userBox =
+document.getElementById("userBox");
+
+if(currentSeller){
+
+userBox.innerHTML = `
+
+<div class="user-box">
+
+👤 مرحبًا ${currentSeller.name}
+
+</div>
+
+`;
+
+document
+.getElementById("signupBox")
+.classList.add("hidden");
+
+document
+.getElementById("loginBox")
+.classList.add("hidden");
+
+document
+.getElementById("loggedBox")
+.classList.remove("hidden");
+
+document
+.getElementById("loggedInfo")
+.innerHTML =
+
+"<strong>الاسم:</strong> " +
+currentSeller.name +
+
+"<br><strong>الهاتف:</strong> " +
+currentSeller.phone +
+
+"<br><strong>البريد:</strong> " +
+currentSeller.email;
+
+
+document
+.getElementById("sellerStatus")
+innerHTML =
+
+"✅ أنت مسجل الدخول باسم <strong>" +
+currentSeller.name +
+"</strong><br>" +
+
+"رقم هاتفك: " +
+currentSeller.phone;
+
+}else{
+
+userBox.innerHTML = "";
+
+document
+.getElementById("signupBox")
+.classList.remove("hidden");
+
+document
+.getElementById("loginBox")
+.classList.remove("hidden");
+
+document
+.getElementById("loggedBox")
+.classList.add("hidden");
+
+document
+.getElementById("sellerStatus")
+innerHTML =
+
+"⚠️ يجب تسجيل الدخول كبائع قبل إضافة منتج.";
+
+}
+
+}
+
+
+/* =========================
+   تسجيل الخروج
+========================= */
+
+async function logoutSeller(){
+
+await supabaseClient.auth.signOut();
+
+currentSeller = null;
+
+updateSellerUI();
+
+showPage("home");
+
+alert("تم تسجيل الخروج.");
+
+}
+
+
+/* =========================
+   إضافة منتج
+========================= */
+
 async function addProduct(){
+
+if(!currentSeller){
+
+alert(
+"يجب إنشاء حساب بائع وتسجيل الدخول أولًا."
+);
+
+showPage("account");
+
+return;
+
+}
+
 
 let name =
 document
@@ -437,16 +935,11 @@ document
 .trim();
 
 
-let sellerPhone =
-document
-.getElementById("sellerPhone")
-.value
-.trim();
+if(!name || !price){
 
-
-if(!name || !price || !sellerPhone){
-
-alert("أدخل اسم المنتج والسعر ورقم هاتف البائع.");
+alert(
+"أدخل اسم المنتج والسعر."
+);
 
 return;
 
@@ -470,7 +963,7 @@ image ||
 "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600",
 
 seller_phone:
-sellerPhone
+currentSeller.phone
 
 });
 
@@ -489,18 +982,26 @@ return;
 }
 
 
-alert("تمت إضافة المنتج بنجاح.");
+alert(
+"تمت إضافة المنتج بنجاح."
+);
 
 
-document.getElementById("productName").value="";
+document
+.getElementById("productName")
+.value="";
 
-document.getElementById("productPrice").value="";
+document
+.getElementById("productPrice")
+.value="";
 
-document.getElementById("productImage").value="";
+document
+.getElementById("productImage")
+.value="";
 
-document.getElementById("productDescription").value="";
-
-document.getElementById("sellerPhone").value="";
+document
+.getElementById("productDescription")
+.value="";
 
 
 await loadProducts();
@@ -509,6 +1010,10 @@ showPage("home");
 
 }
 
+
+/* =========================
+   طلب المنتج
+========================= */
 
 function orderProduct(id){
 
@@ -520,7 +1025,9 @@ String(p.id) === String(id)
 
 if(!selectedProduct){
 
-alert("تعذر العثور على المنتج.");
+alert(
+"تعذر العثور على المنتج."
+);
 
 return;
 
@@ -587,7 +1094,9 @@ style="text-decoration:none;">
 }
 
 
-document.getElementById("selectedProduct").innerHTML =
+document
+.getElementById("selectedProduct")
+.innerHTML =
 
 "<strong>" +
 selectedProduct.name +
@@ -605,11 +1114,17 @@ showPage("order");
 }
 
 
+/* =========================
+   تسجيل الطلب
+========================= */
+
 async function submitOrder(){
 
 if(!selectedProduct){
 
-alert("لم يتم اختيار منتج.");
+alert(
+"لم يتم اختيار منتج."
+);
 
 return;
 
@@ -643,7 +1158,9 @@ if(
 !buyerAddress
 ){
 
-alert("يرجى ملء جميع المعلومات.");
+alert(
+"يرجى ملء جميع المعلومات."
+);
 
 return;
 
@@ -704,8 +1221,6 @@ alert(
 
 "تم تسجيل الطلب بنجاح!\n\n" +
 
-"سيتمكن البائع من التواصل معك لإتمام الطلب.\n\n" +
-
 "سعر المنتج: " +
 
 totalPrice.toLocaleString() +
@@ -715,11 +1230,17 @@ totalPrice.toLocaleString() +
 );
 
 
-document.getElementById("buyerName").value="";
+document
+.getElementById("buyerName")
+.value="";
 
-document.getElementById("buyerPhone").value="";
+document
+.getElementById("buyerPhone")
+.value="";
 
-document.getElementById("buyerAddress").value="";
+document
+.getElementById("buyerAddress")
+.value="";
 
 
 selectedProduct = null;
@@ -728,6 +1249,10 @@ showPage("home");
 
 }
 
+
+/* =========================
+   التنقل بين الصفحات
+========================= */
 
 function showPage(page){
 
@@ -743,6 +1268,10 @@ document
 .getElementById("order")
 .classList.add("hidden");
 
+document
+.getElementById("account")
+.classList.add("hidden");
+
 
 document
 .getElementById(page)
@@ -755,10 +1284,30 @@ displayProducts();
 
 }
 
+
+if(page === "add"){
+
+updateSellerUI();
+
+}
+
 }
 
 
-loadProducts();
+/* =========================
+   تشغيل الموقع
+========================= */
+
+async function startApp(){
+
+await loadCurrentSeller();
+
+await loadProducts();
+
+}
+
+
+startApp();
 
 </script>
 
