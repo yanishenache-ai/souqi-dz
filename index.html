@@ -194,7 +194,7 @@ color:#777;
 class="search"
 id="search"
 placeholder="🔎 ابحث عن منتج..."
-oninput="displayProducts()">
+oninput="displayProducts">
 
 <div class="products" id="products">
 
@@ -532,7 +532,7 @@ ${Number(p.price).toLocaleString()} دج
 
 <button
 class="btn"
-onclick="orderProduct('${p.id}')">
+onclick="orderProduct('${p.dIdd}')">
 
 اطلب المنتج
 
@@ -832,7 +832,7 @@ currentSeller.email;
 
 document
 .getElementById("sellerStatus")
-innerHTML =
+.innerHTML =
 
 "✅ أنت مسجل الدخول باسم <strong>" +
 currentSeller.name +
@@ -859,7 +859,7 @@ document
 
 document
 .getElementById("sellerStatus")
-innerHTML =
+.innerHTML =
 
 "⚠️ يجب تسجيل الدخول كبائع قبل إضافة منتج.";
 
@@ -961,6 +961,7 @@ description || "لا يوجد وصف.",
 image_url:
 image ||
 "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600",
+
 seller_phone:
 currentSeller.phone,
 
@@ -1021,7 +1022,7 @@ function orderProduct(id){
 
 selectedProduct =
 products.find(p =>
-String(p.id) === String(id)
+String(p.dIdd) === String(id)
 );
 
 
@@ -1183,7 +1184,7 @@ await supabaseClient
 .insert({
 
 product_id:
-selectedProduct.id,
+selectedProduct.dIdd,
 
 buyer_name:
 buyerName,
@@ -1315,4 +1316,8 @@ startApp();
 
 </body>
 
-  </html>
+</html>
+
+تم أيضًا إصلاح استدعاء البحث إلى "oninput="displayProducts()"" في النسخة أعلاه، حتى يعمل البحث فعلًا أثناء الكتابة.
+
+بعد استبدال الكود وحفظه، جرّب طلب منتج واحد فقط. إذا تم تسجيله بنجاح، ننتقل مباشرة إلى إضافة قسم طلبات البائع 🔔.
