@@ -16,7 +16,7 @@ box-sizing:border-box;
 body{
 margin:0;
 font-family:Arial,sans-serif;
-background:#f4f6f8;
+background:#f5f6fa;
 color:#222;
 }
 
@@ -28,28 +28,42 @@ text-align:center;
 }
 
 header h1{
-margin:0 0 6px;
+margin:0 0 10px;
 }
 
 nav{
 display:flex;
 justify-content:center;
 gap:10px;
-margin-top:15px;
 flex-wrap:wrap;
 }
 
 nav button{
 border:0;
-padding:10px 16px;
+padding:10px 15px;
 border-radius:8px;
 cursor:pointer;
+background:#2563eb;
+color:white;
+font-size:15px;
+}
+
+nav button:hover{
+background:#1d4ed8;
 }
 
 .container{
 max-width:1100px;
-margin:25px auto;
-padding:0 15px;
+margin:auto;
+padding:20px;
+}
+
+.page{
+display:none;
+}
+
+.page.active{
+display:block;
 }
 
 .search{
@@ -64,64 +78,63 @@ font-size:16px;
 .products{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:18px;
+gap:20px;
 }
 
 .card{
 background:white;
 border-radius:12px;
-overflow:hidden;
-box-shadow:0 2px 10px rgba(0,0,0,.08);
+padding:15px;
+box-shadow:0 3px 10px rgba(0,0,0,.08);
 }
 
 .card img{
 width:100%;
-height:190px;
+height:200px;
 object-fit:cover;
+border-radius:10px;
 }
 
-.card-content{
-padding:15px;
+.card h3{
+margin-bottom:8px;
 }
 
 .price{
 font-size:20px;
 font-weight:bold;
+color:#16a34a;
 margin:10px 0;
 }
 
-.btn{
-background:#111827;
-color:white;
-border:0;
-padding:11px 15px;
-border-radius:8px;
-cursor:pointer;
+.card button,
+form button{
 width:100%;
-margin-top:8px;
-}
-
-.whatsapp{
-background:#25D366;
-}
-
-.call{
+padding:12px;
+border:0;
+border-radius:8px;
 background:#2563eb;
+color:white;
+font-size:16px;
+cursor:pointer;
 }
 
-.logout{
-background:#dc2626;
+.card button:hover,
+form button:hover{
+background:#1d4ed8;
 }
 
-.form{
+form{
 background:white;
 padding:20px;
 border-radius:12px;
-box-shadow:0 2px 10px rgba(0,0,0,.08);
+box-shadow:0 3px 10px rgba(0,0,0,.08);
+max-width:600px;
+margin:auto;
 }
 
-.form input,
-.form textarea{
+input,
+textarea,
+select{
 width:100%;
 padding:12px;
 margin:8px 0 15px;
@@ -130,26 +143,78 @@ border-radius:8px;
 font-size:15px;
 }
 
-.hidden{
+textarea{
+min-height:100px;
+resize:vertical;
+}
+
+.form-title{
+text-align:center;
+margin-bottom:20px;
+}
+
+.message{
+padding:12px;
+border-radius:8px;
+margin:10px 0;
 display:none;
 }
 
+.success{
+background:#dcfce7;
+color:#166534;
+}
+
+.error{
+background:#fee2e2;
+color:#991b1b;
+}
+
+.account-box{
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 3px 10px rgba(0,0,0,.08);
+max-width:600px;
+margin:auto;
+}
+
+.account-box h2{
+margin-top:0;
+}
+
 .user-box{
-background:#e5e7eb;
-color:#111827;
-padding:10px;
-border-radius:8px;
+text-align:center;
 margin-top:10px;
+font-size:14px;
+}
+
+.logout{
+background:#dc2626 !important;
+}
+
+.logout:hover{
+background:#b91c1c !important;
+}
+
+.product-info{
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 3px 10px rgba(0,0,0,.08);
+max-width:600px;
+margin:auto;
 }
 
 footer{
+margin-top:40px;
+background:#111827;
+color:white;
 text-align:center;
-padding:30px;
-color:#777;
+padding:20px;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -158,8 +223,6 @@ color:#777;
 
 <h1>🛒 سوقي DZ</h1>
 
-<p>سوق إلكتروني جزائري بسيط</p>
-
 <nav>
 
 <button onclick="showPage('home')">
@@ -167,16 +230,20 @@ color:#777;
 </button>
 
 <button onclick="showPage('add')">
-أضف منتجًا
+➕ إضافة منتج
+</button>
+
+<button onclick="showPage('order')">
+📦 طلباتي
 </button>
 
 <button onclick="showPage('account')">
-حساب البائع
+👤 حساب البائع
 </button>
 
 </nav>
 
-<div id="userBox"></div>
+<div id="userBox" class="user-box"></div>
 
 </header>
 
@@ -184,19 +251,20 @@ color:#777;
 <div class="container">
 
 
-<!-- المنتجات -->
+<!-- الصفحة الرئيسية -->
 
-<section id="home">
+<section id="home" class="page active">
 
-<h2>المنتجات</h2>
+<h2>🛍️ المنتجات</h2>
 
 <input
 class="search"
 id="search"
 placeholder="🔎 ابحث عن منتج..."
-oninput="displayProducts">
+oninput="displayProducts()"
+>
 
-<div class="products" id="products">
+<div id="products" class="products">
 
 <p>جاري تحميل المنتجات...</p>
 
@@ -207,154 +275,165 @@ oninput="displayProducts">
 
 <!-- إضافة منتج -->
 
-<section id="add" class="hidden">
+<section id="add" class="page">
 
-<h2>إضافة منتج</h2>
+<h2>➕ إضافة منتج</h2>
 
-<div class="form">
+<div id="sellerStatus"></div>
 
-<p id="sellerStatus"></p>
+<form onsubmit="addProduct(event)">
 
-<label>اسم المنتج</label>
+<label>
+اسم المنتج
+</label>
 
 <input
+type="text"
 id="productName"
-placeholder="مثال: هاتف">
+required
+>
 
-
-<label>السعر بالدينار</label>
+<label>
+السعر بالدينار
+</label>
 
 <input
-id="productPrice"
 type="number"
-placeholder="مثال: 25000">
+id="productPrice"
+min="0"
+required
+>
 
-
-<label>رابط صورة المنتج</label>
+<label>
+رابط صورة المنتج
+</label>
 
 <input
+type="url"
 id="productImage"
-placeholder="ضع رابط الصورة">
+placeholder="https://..."
+>
 
-
-<label>وصف المنتج</label>
+<label>
+وصف المنتج
+</label>
 
 <textarea
 id="productDescription"
-placeholder="اكتب وصفًا مختصرًا"></textarea>
+placeholder="اكتب وصف المنتج..."
+></textarea>
 
-
-<button
-class="btn"
-onclick="addProduct()">
-
-إضافة المنتج
-
+<button type="submit">
+➕ إضافة المنتج
 </button>
 
-</div>
+<div id="addMessage" class="message"></div>
+
+</form>
 
 </section>
 
 
-<!-- الطلب -->
+<!-- طلب المنتج -->
 
-<section id="order" class="hidden">
+<section id="order" class="page">
 
-<h2>طلب المنتج</h2>
+<h2>📦 طلب المنتج</h2>
 
-<div class="form">
+<div id="selectedProduct"></div>
 
-<p id="selectedProduct"></p>
+<form onsubmit="submitOrder(event)">
 
-<label>اسمك</label>
+<label>
+الاسم الكامل
+</label>
 
 <input
+type="text"
 id="buyerName"
-placeholder="اسمك الكامل">
+required
+>
 
-
-<label>رقم الهاتف</label>
+<label>
+رقم الهاتف
+</label>
 
 <input
-id="buyerPhone"
 type="tel"
-placeholder="رقم الهاتف">
+id="buyerPhone"
+required
+>
 
-
-<label>الولاية والعنوان</label>
+<label>
+الولاية والعنوان
+</label>
 
 <textarea
 id="buyerAddress"
-placeholder="الولاية والعنوان"></textarea>
+placeholder="اكتب الولاية والعنوان بالتفصيل"
+required
+></textarea>
 
-
-<button
-class="btn"
-onclick="submitOrder()">
-
-تأكيد الطلب
-
+<button type="submit">
+✅ تأكيد الطلب
 </button>
 
-</div>
+<div id="orderMessage" class="message"></div>
+
+</form>
 
 </section>
 
 
 <!-- حساب البائع -->
 
-<section id="account" class="hidden">
+<section id="account" class="page">
 
-<h2>حساب البائع</h2>
+<div id="accountContent">
 
+<h2>👤 حساب البائع</h2>
 
-<!-- تسجيل -->
+<div class="account-box">
 
-<div
-class="form"
-id="signupBox">
+<h3>📝 إنشاء حساب بائع</h3>
 
-<h3>إنشاء حساب بائع</h3>
-
-<label>اسمك</label>
+<form onsubmit="signupSeller(event)">
 
 <input
-id="sellerName"
-placeholder="اسم البائع">
-
-
-<label>رقم الهاتف</label>
+type="text"
+id="signupName"
+placeholder="اسم البائع"
+required
+>
 
 <input
-id="sellerPhone"
 type="tel"
-placeholder="مثال: 0550123456">
-
-
-<label>البريد الإلكتروني</label>
+id="signupPhone"
+placeholder="رقم الهاتف"
+required
+>
 
 <input
-id="sellerEmail"
 type="email"
-placeholder="example@gmail.com">
-
-
-<label>كلمة المرور</label>
+id="signupEmail"
+placeholder="البريد الإلكتروني"
+required
+>
 
 <input
-id="sellerPassword"
 type="password"
-placeholder="كلمة المرور">
+id="signupPassword"
+placeholder="كلمة المرور"
+required
+>
 
-
-<button
-class="btn"
-onclick="signupSeller()">
-
+<button type="submit">
 إنشاء الحساب
-
 </button>
+
+<div id="signupMessage" class="message"></div>
+
+</form>
 
 </div>
 
@@ -362,58 +441,35 @@ onclick="signupSeller()">
 <br>
 
 
-<!-- تسجيل الدخول -->
+<div class="account-box">
 
-<div
-class="form"
-id="loginBox">
+<h3>🔐 تسجيل الدخول</h3>
 
-<h3>تسجيل الدخول</h3>
-
-<label>البريد الإلكتروني</label>
+<form onsubmit="loginSeller(event)">
 
 <input
-id="loginEmail"
 type="email"
-placeholder="البريد الإلكتروني">
-
-
-<label>كلمة المرور</label>
+id="loginEmail"
+placeholder="البريد الإلكتروني"
+required
+>
 
 <input
-id="loginPassword"
 type="password"
-placeholder="كلمة المرور">
+id="loginPassword"
+placeholder="كلمة المرور"
+required
+>
 
-
-<button
-class="btn"
-onclick="loginSeller()">
-
+<button type="submit">
 تسجيل الدخول
-
 </button>
+
+<div id="loginMessage" class="message"></div>
+
+</form>
 
 </div>
-
-
-<!-- الحساب بعد تسجيل الدخول -->
-
-<div
-class="form hidden"
-id="loggedBox">
-
-<h3>👤 حسابك</h3>
-
-<p id="loggedInfo"></p>
-
-<button
-class="btn logout"
-onclick="logoutSeller()">
-
-تسجيل الخروج
-
-</button>
 
 </div>
 
@@ -424,20 +480,28 @@ onclick="logoutSeller()">
 
 <footer>
 
-سوقي DZ © 2026
+<p>🛒 سوقي DZ</p>
+
+<p>
+منصة جزائرية للبيع والشراء
+</p>
 
 </footer>
 
 
+<!-- Supabase -->
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 
 <script>
 
 const SUPABASE_URL =
-'https://sjxjhyqayhscbqqniemp.supabase.co';
+"https://sjxjhyqayhscbqqniemp.supabase.co";
 
 const SUPABASE_KEY =
-'sb_publishable_nTr9xyFihJNfs91HVbnHCg_lqFc6x_n';
+"sb_publishable_nTr9xyFihJNfs91HVbnHCg_lqFc6x_n";
+
 
 const supabaseClient =
 supabase.createClient(
@@ -459,13 +523,11 @@ let currentSeller = null;
 
 async function loadProducts(){
 
-const { data, error } =
+const {data,error} =
 await supabaseClient
 .from("products")
 .select("*")
-.order("created_at", {
-ascending:false
-});
+.order("created_at",{ascending:false});
 
 
 if(error){
@@ -473,11 +535,11 @@ if(error){
 console.error(error);
 
 document.getElementById("products").innerHTML =
-"<p>حدث خطأ أثناء تحميل المنتجات.</p>";
+"<p>حدث خطأ أثناء تحميل المنتجات</p>";
 
 return;
-
 }
+
 
 products = data || [];
 
@@ -492,14 +554,16 @@ displayProducts();
 
 function displayProducts(){
 
-let search =
-document
-.getElementById("search")
+const container =
+document.getElementById("products");
+
+const search =
+document.getElementById("search")
 .value
 .toLowerCase();
 
 
-let list =
+const filtered =
 products.filter(p =>
 (p.name || "")
 .toLowerCase()
@@ -507,93 +571,84 @@ products.filter(p =>
 );
 
 
-let html = "";
+if(filtered.length === 0){
 
-
-list.forEach((p)=>{
-
-html += `
-
-<div class="card">
-
-<img
-src="${p.image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600'}"
-alt="${p.name}">
-
-<div class="card-content">
-
-<h3>${p.name}</h3>
-
-<p>${p.description || "لا يوجد وصف."}</p>
-
-<div class="price">
-${Number(p.price).toLocaleString()} دج
-</div>
-
-<button
-class="btn"
-onclick="orderProduct('${p.dIdd}')">
-
-اطلب المنتج
-
-</button>
-
-</div>
-
-</div>
-
-`;
-
-});
-
-
-document.getElementById("products").innerHTML =
-html ||
-"<p>لم يتم العثور على منتجات.</p>";
-
-}
-
-
-/* =========================
-   إنشاء حساب البائع
-========================= */
-
-async function signupSeller(){
-
-let name =
-document
-.getElementById("sellerName")
-.value
-.trim();
-
-let phone =
-document
-.getElementById("sellerPhone")
-.value
-.trim();
-
-let email =
-document
-.getElementById("sellerEmail")
-.value
-.trim();
-
-let password =
-document
-.getElementById("sellerPassword")
-.value;
-
-
-if(!name || !phone || !email || !password){
-
-alert("يرجى ملء جميع المعلومات.");
+container.innerHTML =
+"<p>لا توجد منتجات.</p>";
 
 return;
 
 }
 
 
-const { data, error } =
+container.innerHTML =
+filtered.map(p => `
+
+<div class="card">
+
+<img
+src="${p.image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600'}"
+alt="${p.name || 'منتج'}"
+>
+
+<h3>
+${p.name || "منتج بدون اسم"}
+</h3>
+
+<div class="price">
+${p.price || 0} دج
+</div>
+
+<p>
+${p.description || "لا يوجد وصف."}
+</p>
+
+<button
+onclick="orderProduct('${p.dIdd}')"
+>
+🛒 اطلب الآن
+</button>
+
+</div>
+
+`).join("");
+
+}
+
+
+/* =========================
+   إنشاء حساب بائع
+========================= */
+
+async function signupSeller(event){
+
+event.preventDefault();
+
+
+const name =
+document.getElementById("signupName").value.trim();
+
+const phone =
+document.getElementById("signupPhone").value.trim();
+
+const email =
+document.getElementById("signupEmail").value.trim();
+
+const password =
+document.getElementById("signupPassword").value;
+
+
+const message =
+document.getElementById("signupMessage");
+
+
+message.style.display="none";
+
+
+const {
+data,
+error
+} =
 await supabaseClient.auth.signUp({
 
 email:email,
@@ -605,10 +660,13 @@ password:password
 
 if(error){
 
-alert(
-"خطأ أثناء إنشاء الحساب:\n" +
-error.message
-);
+message.className =
+"message error";
+
+message.textContent =
+"خطأ: " + error.message;
+
+message.style.display="block";
 
 return;
 
@@ -617,16 +675,24 @@ return;
 
 if(!data.user){
 
-alert("تعذر إنشاء الحساب.");
+message.className =
+"message error";
+
+message.textContent =
+"لم يتم إنشاء المستخدم.";
+
+message.style.display="block";
 
 return;
 
 }
 
 
-/* حفظ معلومات البائع */
+/* إضافة البائع */
 
-const { error: sellerError } =
+const {
+error:sellerError
+} =
 await supabaseClient
 .from("sellers")
 .insert({
@@ -644,38 +710,30 @@ auth_user_id:data.user.id
 
 if(sellerError){
 
-console.error(sellerError);
+message.className =
+"message error";
 
-alert(
-"تم إنشاء حساب الدخول، لكن حدث خطأ في حفظ بيانات البائع:\n" +
-sellerError.message
-);
+message.textContent =
+"تم إنشاء الحساب لكن حدث خطأ في بيانات البائع: "
++ sellerError.message;
+
+message.style.display="block";
 
 return;
 
 }
 
 
-currentSeller = {
+message.className =
+"message success";
 
-id:data.user.id,
+message.textContent =
+"تم إنشاء حساب البائع بنجاح ✅";
 
-name:name,
-
-phone:phone,
-
-email:email
-
-};
+message.style.display="block";
 
 
-updateSellerUI();
-
-alert(
-"تم إنشاء حساب البائع بنجاح."
-);
-
-showPage("add");
+await loadCurrentSeller();
 
 }
 
@@ -684,30 +742,29 @@ showPage("add");
    تسجيل الدخول
 ========================= */
 
-async function loginSeller(){
+async function loginSeller(event){
 
-let email =
-document
-.getElementById("loginEmail")
-.value
-.trim();
-
-let password =
-document
-.getElementById("loginPassword")
-.value;
+event.preventDefault();
 
 
-if(!email || !password){
+const email =
+document.getElementById("loginEmail").value.trim();
 
-alert("أدخل البريد الإلكتروني وكلمة المرور.");
-
-return;
-
-}
+const password =
+document.getElementById("loginPassword").value;
 
 
-const { data, error } =
+const message =
+document.getElementById("loginMessage");
+
+
+message.style.display="none";
+
+
+const {
+data,
+error
+} =
 await supabaseClient.auth.signInWithPassword({
 
 email:email,
@@ -719,10 +776,13 @@ password:password
 
 if(error){
 
-alert(
-"خطأ في تسجيل الدخول:\n" +
-error.message
-);
+message.className =
+"message error";
+
+message.textContent =
+"خطأ: " + error.message;
+
+message.style.display="block";
 
 return;
 
@@ -731,9 +791,15 @@ return;
 
 await loadCurrentSeller();
 
-alert("تم تسجيل الدخول بنجاح.");
 
-showPage("add");
+message.className =
+"message success";
+
+message.textContent =
+"تم تسجيل الدخول بنجاح ✅";
+
+message.style.display="block";
+
 
 }
 
@@ -744,7 +810,9 @@ showPage("add");
 
 async function loadCurrentSeller(){
 
-const { data } =
+const {
+data
+} =
 await supabaseClient.auth.getUser();
 
 
@@ -759,21 +827,29 @@ return;
 }
 
 
-const { data: seller } =
+const {
+data:seller,
+error
+} =
 await supabaseClient
 .from("sellers")
 .select("*")
-.eq("auth_user_id", data.user.id)
+.eq(
+"auth_user_id",
+data.user.id
+)
 .single();
 
 
-if(seller){
+if(error){
 
-currentSeller = seller;
+console.error(error);
+
+currentSeller = null;
 
 }else{
 
-currentSeller = null;
+currentSeller = seller;
 
 }
 
@@ -784,84 +860,88 @@ updateSellerUI();
 
 
 /* =========================
-   تحديث واجهة الحساب
+   تحديث واجهة البائع
 ========================= */
 
 function updateSellerUI(){
 
-let userBox =
+const userBox =
 document.getElementById("userBox");
+
+const sellerStatus =
+document.getElementById("sellerStatus");
+
+const accountContent =
+document.getElementById("accountContent");
+
 
 if(currentSeller){
 
 userBox.innerHTML = `
-
-<div class="user-box">
-
 👤 مرحبًا ${currentSeller.name}
+`;
+
+sellerStatus.innerHTML = `
+
+<div class="message success"
+style="display:block">
+
+أنت مسجل كبائع باسم:
+<strong>
+${currentSeller.name}
+</strong>
 
 </div>
 
 `;
 
-document
-.getElementById("signupBox")
-.classList.add("hidden");
+accountContent.innerHTML = `
 
-document
-.getElementById("loginBox")
-.classList.add("hidden");
+<div class="account-box">
 
-document
-.getElementById("loggedBox")
-.classList.remove("hidden");
+<h2>👤 حساب البائع</h2>
 
-document
-.getElementById("loggedInfo")
-.innerHTML =
+<p>
+<strong>الاسم:</strong>
+${currentSeller.name}
+</p>
 
-"<strong>الاسم:</strong> " +
-currentSeller.name +
+<p>
+<strong>الهاتف:</strong>
+${currentSeller.phone}
+</p>
 
-"<br><strong>الهاتف:</strong> " +
-currentSeller.phone +
+<p>
+<strong>البريد:</strong>
+${currentSeller.email}
+</p>
 
-"<br><strong>البريد:</strong> " +
-currentSeller.email;
+<button
+class="logout"
+onclick="logoutSeller()"
+>
+🚪 تسجيل الخروج
+</button>
 
+</div>
 
-document
-.getElementById("sellerStatus")
-.innerHTML =
-
-"✅ أنت مسجل الدخول باسم <strong>" +
-currentSeller.name +
-"</strong><br>" +
-
-"رقم هاتفك: " +
-currentSeller.phone;
+`;
 
 }else{
 
-userBox.innerHTML = "";
+userBox.innerHTML =
+"";
 
-document
-.getElementById("signupBox")
-.classList.remove("hidden");
+sellerStatus.innerHTML = `
 
-document
-.getElementById("loginBox")
-.classList.remove("hidden");
+<div class="message error"
+style="display:block">
 
-document
-.getElementById("loggedBox")
-.classList.add("hidden");
+يجب تسجيل الدخول كبائع لإضافة المنتجات.
 
-document
-.getElementById("sellerStatus")
-.innerHTML =
+</div>
 
-"⚠️ يجب تسجيل الدخول كبائع قبل إضافة منتج.";
+`;
 
 }
 
@@ -874,15 +954,29 @@ document
 
 async function logoutSeller(){
 
+const {
+error
+} =
 await supabaseClient.auth.signOut();
+
+
+if(error){
+
+alert(
+"حدث خطأ أثناء تسجيل الخروج: "
++ error.message
+);
+
+return;
+
+}
+
 
 currentSeller = null;
 
 updateSellerUI();
 
 showPage("home");
-
-alert("تم تسجيل الخروج.");
 
 }
 
@@ -891,29 +985,41 @@ alert("تم تسجيل الخروج.");
    إضافة منتج
 ========================= */
 
-async function addProduct(){
+async function addProduct(event){
+
+event.preventDefault();
+
+
+const message =
+document.getElementById("addMessage");
+
+
+message.style.display="none";
+
 
 if(!currentSeller){
 
-alert(
-"يجب إنشاء حساب بائع وتسجيل الدخول أولًا."
-);
+message.className =
+"message error";
 
-showPage("account");
+message.textContent =
+"يجب فتح حساب بائع أولاً.";
+
+message.style.display="block";
 
 return;
 
 }
 
 
-let name =
+const name =
 document
 .getElementById("productName")
 .value
 .trim();
 
 
-let price =
+const price =
 Number(
 document
 .getElementById("productPrice")
@@ -921,32 +1027,23 @@ document
 );
 
 
-let image =
+const image =
 document
 .getElementById("productImage")
 .value
 .trim();
 
 
-let description =
+const description =
 document
 .getElementById("productDescription")
 .value
 .trim();
 
 
-if(!name || !price){
-
-alert(
-"أدخل اسم المنتج والسعر."
-);
-
-return;
-
-}
-
-
-const { error } =
+const {
+error
+} =
 await supabaseClient
 .from("products")
 .insert({
@@ -975,47 +1072,41 @@ if(error){
 
 console.error(error);
 
-alert(
-"خطأ Supabase:\n" +
-error.message
-);
+message.className =
+"message error";
+
+message.textContent =
+"خطأ Supabase: "
++ error.message;
+
+message.style.display="block";
 
 return;
 
 }
 
 
-alert(
-"تمت إضافة المنتج بنجاح."
-);
+message.className =
+"message success";
+
+message.textContent =
+"تمت إضافة المنتج بنجاح ✅";
+
+message.style.display="block";
 
 
 document
-.getElementById("productName")
-.value="";
-
-document
-.getElementById("productPrice")
-.value="";
-
-document
-.getElementById("productImage")
-.value="";
-
-document
-.getElementById("productDescription")
-.value="";
+.querySelector("#add form")
+.reset();
 
 
 await loadProducts();
-
-showPage("home");
 
 }
 
 
 /* =========================
-   طلب المنتج
+   فتح صفحة الطلب
 ========================= */
 
 function orderProduct(id){
@@ -1028,88 +1119,44 @@ String(p.dIdd) === String(id)
 
 if(!selectedProduct){
 
-alert(
-"تعذر العثور على المنتج."
-);
+alert("لم يتم العثور على المنتج.");
 
 return;
 
 }
 
 
-let phone =
-selectedProduct.seller_phone || "";
+document.getElementById(
+"selectedProduct"
+).innerHTML = `
 
+<div class="product-info">
 
-let contactButtons = "";
-
-
-if(phone){
-
-let cleanPhone =
-phone.replace(/\D/g,'');
-
-
-let whatsappPhone =
-cleanPhone;
-
-
-if(cleanPhone.startsWith("0")){
-
-whatsappPhone =
-"213" +
-cleanPhone.substring(1);
-
-}
-
-
-contactButtons = `
-
-<hr>
+<h3>
+${selectedProduct.name}
+</h3>
 
 <p>
-<strong>📞 تواصل مع البائع</strong>
+السعر:
+<strong>
+${selectedProduct.price} دج
+</strong>
 </p>
 
-<a
-href="tel:${phone}"
-style="text-decoration:none;">
+<p>
+${selectedProduct.description || ""}
+</p>
 
-<button class="btn call">
-📞 الاتصال بالبائع
-</button>
+</div>
 
-</a>
-
-<a
-href="https://wa.me/${whatsappPhone}"
-target="_blank"
-style="text-decoration:none;">
-
-<button class="btn whatsapp">
-💬 التواصل عبر واتساب
-</button>
-
-</a>
+<br>
 
 `;
 
-}
 
-
-document
-.getElementById("selectedProduct")
-.innerHTML =
-
-"<strong>" +
-selectedProduct.name +
-"</strong><br>" +
-
-"السعر: " +
-Number(selectedProduct.price).toLocaleString() +
-" دج" +
-
-contactButtons;
+document.getElementById(
+"orderMessage"
+).style.display="none";
 
 
 showPage("order");
@@ -1121,64 +1168,69 @@ showPage("order");
    تسجيل الطلب
 ========================= */
 
-async function submitOrder(){
+async function submitOrder(event){
+
+event.preventDefault();
+
+
+const message =
+document.getElementById("orderMessage");
+
+
+message.style.display="none";
+
 
 if(!selectedProduct){
 
-alert(
-"لم يتم اختيار منتج."
-);
+message.className =
+"message error";
+
+message.textContent =
+"لم يتم اختيار منتج.";
+
+message.style.display="block";
 
 return;
 
 }
 
 
-let buyerName =
+const buyerName =
 document
 .getElementById("buyerName")
 .value
 .trim();
 
 
-let buyerPhone =
+const buyerPhone =
 document
 .getElementById("buyerPhone")
 .value
 .trim();
 
 
-let buyerAddress =
+const buyerAddress =
 document
 .getElementById("buyerAddress")
 .value
 .trim();
 
 
-if(
-!buyerName ||
-!buyerPhone ||
-!buyerAddress
-){
-
-alert(
-"يرجى ملء جميع المعلومات."
-);
-
-return;
-
-}
+const quantity = 1;
 
 
-let totalPrice =
-Number(selectedProduct.price);
+const totalPrice =
+Number(selectedProduct.price) *
+quantity;
 
 
-let commission =
+const commission =
 totalPrice * 0.05;
 
 
-const { error } =
+const {
+error
+} =
 await supabaseClient
 .from("orders")
 .insert({
@@ -1195,7 +1247,8 @@ buyerPhone,
 buyer_address:
 buyerAddress,
 
-quantity:1,
+quantity:
+quantity,
 
 total_price:
 totalPrice,
@@ -1210,45 +1263,32 @@ if(error){
 
 console.error(error);
 
-alert(
-"حدث خطأ أثناء تسجيل الطلب:\n" +
-error.message
-);
+message.className =
+"message error";
+
+message.textContent =
+"حدث خطأ أثناء تسجيل الطلب: "
++ error.message;
+
+message.style.display="block";
 
 return;
 
 }
 
 
-alert(
+message.className =
+"message success";
 
-"تم تسجيل الطلب بنجاح!\n\n" +
+message.textContent =
+"تم تسجيل الطلب بنجاح ✅";
 
-"سعر المنتج: " +
-
-totalPrice.toLocaleString() +
-
-" دج"
-
-);
+message.style.display="block";
 
 
 document
-.getElementById("buyerName")
-.value="";
-
-document
-.getElementById("buyerPhone")
-.value="";
-
-document
-.getElementById("buyerAddress")
-.value="";
-
-
-selectedProduct = null;
-
-showPage("home");
+.querySelector("#order form")
+.reset();
 
 }
 
@@ -1260,37 +1300,28 @@ showPage("home");
 function showPage(page){
 
 document
-.getElementById("home")
-.classList.add("hidden");
+.querySelectorAll(".page")
+.forEach(section => {
 
-document
-.getElementById("add")
-.classList.add("hidden");
+section.classList.remove("active");
 
-document
-.getElementById("order")
-.classList.add("hidden");
-
-document
-.getElementById("account")
-.classList.add("hidden");
+});
 
 
-document
-.getElementById(page)
-.classList.remove("hidden");
+const selected =
+document.getElementById(page);
 
 
-if(page === "home"){
+if(selected){
 
-displayProducts();
+selected.classList.add("active");
 
 }
 
 
-if(page === "add"){
+if(page === "home"){
 
-updateSellerUI();
+loadProducts();
 
 }
 
@@ -1315,5 +1346,4 @@ startApp();
 </script>
 
 </body>
-
-</html>
+   </html>
