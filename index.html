@@ -98,6 +98,15 @@ padding:11px 15px;
 border-radius:8px;
 cursor:pointer;
 width:100%;
+margin-top:8px;
+}
+
+.whatsapp{
+background:#25D366;
+}
+
+.call{
+background:#2563eb;
 }
 
 .form{
@@ -119,13 +128,6 @@ font-size:15px;
 
 .hidden{
 display:none;
-}
-
-.message{
-padding:15px;
-background:white;
-border-radius:10px;
-margin-bottom:15px;
 }
 
 footer{
@@ -160,9 +162,7 @@ color:#777;
 
 </header>
 
-
 <div class="container">
-
 
 <section id="home">
 
@@ -180,12 +180,7 @@ oninput="displayProducts()">
 
 </div>
 
-
-
-
-
 </section>
-
 
 
 <section id="add" class="hidden">
@@ -223,6 +218,14 @@ id="productDescription"
 placeholder="اكتب وصفًا مختصرًا"></textarea>
 
 
+<label>رقم هاتف البائع</label>
+
+<input
+id="sellerPhone"
+type="tel"
+placeholder="مثال: 0550123456">
+
+
 <button
 class="btn"
 onclick="addProduct()">
@@ -234,7 +237,6 @@ onclick="addProduct()">
 </div>
 
 </section>
-
 
 
 <section id="order" class="hidden">
@@ -279,7 +281,6 @@ onclick="submitOrder()">
 
 </section>
 
-
 </div>
 
 
@@ -288,7 +289,6 @@ onclick="submitOrder()">
 سوقي DZ © 2026
 
 </footer>
-
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -362,7 +362,7 @@ products.filter(p =>
 let html = "";
 
 
-list.forEach((p,index)=>{
+list.forEach((p)=>{
 
 html += `
 
@@ -384,7 +384,7 @@ ${Number(p.price).toLocaleString()} دج
 
 <button
 class="btn"
-onclick="orderProduct(${index})">
+onclick="orderProduct('${p.id}')">
 
 اطلب المنتج
 
@@ -437,9 +437,16 @@ document
 .trim();
 
 
-if(!name || !price){
+let sellerPhone =
+document
+.getElementById("sellerPhone")
+.value
+.trim();
 
-alert("أدخل اسم المنتج والسعر.");
+
+if(!name || !price || !sellerPhone){
+
+alert("أدخل اسم المنتج والسعر ورقم هاتف البائع.");
 
 return;
 
@@ -460,7 +467,10 @@ description || "لا يوجد وصف.",
 
 image_url:
 image ||
-"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600"
+"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600",
+
+seller_phone:
+sellerPhone
 
 });
 
@@ -490,6 +500,8 @@ document.getElementById("productImage").value="";
 
 document.getElementById("productDescription").value="";
 
+document.getElementById("sellerPhone").value="";
+
 
 await loadProducts();
 
@@ -498,10 +510,81 @@ showPage("home");
 }
 
 
-function orderProduct(index){
+function orderProduct(id){
 
 selectedProduct =
-products[index];
+products.find(p =>
+String(p.id) === String(id)
+);
+
+
+if(!selectedProduct){
+
+alert("تعذر العثور على المنتج.");
+
+return;
+
+}
+
+
+let phone =
+selectedProduct.seller_phone || "";
+
+
+let contactButtons = "";
+
+
+if(phone){
+
+let cleanPhone =
+phone.replace(/\D/g,'');
+
+
+let whatsappPhone =
+cleanPhone;
+
+
+if(cleanPhone.startsWith("0")){
+
+whatsappPhone =
+"213" +
+cleanPhone.substring(1);
+
+}
+
+
+contactButtons = `
+
+<hr>
+
+<p>
+<strong>📞 تواصل مع البائع</strong>
+</p>
+
+<a
+href="tel:${phone}"
+style="text-decoration:none;">
+
+<button class="btn call">
+📞 الاتصال بالبائع
+</button>
+
+</a>
+
+<a
+href="https://wa.me/${whatsappPhone}"
+target="_blank"
+style="text-decoration:none;">
+
+<button class="btn whatsapp">
+💬 التواصل عبر واتساب
+</button>
+
+</a>
+
+`;
+
+}
 
 
 document.getElementById("selectedProduct").innerHTML =
@@ -512,7 +595,9 @@ selectedProduct.name +
 
 "السعر: " +
 Number(selectedProduct.price).toLocaleString() +
-" دج";
+" دج" +
+
+contactButtons;
 
 
 showPage("order");
@@ -619,15 +704,11 @@ alert(
 
 "تم تسجيل الطلب بنجاح!\n\n" +
 
+"سيتمكن البائع من التواصل معك لإتمام الطلب.\n\n" +
+
 "سعر المنتج: " +
 
 totalPrice.toLocaleString() +
-
-" دج\n" +
-
-"عمولة سوقي DZ: " +
-
-commission.toLocaleString() +
 
 " دج"
 
