@@ -1341,7 +1341,116 @@ loadProducts();
 
 }
 
+/* =========================
+   طلبات البائع
+========================= */
 
+async function loadSellerOrders(){
+
+const container =
+document.getElementById("sellerOrders");
+
+
+if(!currentSeller){
+
+container.innerHTML =
+"<p>يجب تسجيل الدخول كبائع أولاً.</p>";
+
+return;
+
+}
+
+
+const {
+data,
+error
+} =
+await supabaseClient
+.from("orders")
+.select("*");
+
+
+if(error){
+
+console.error(error);
+
+container.innerHTML =
+"<p>حدث خطأ أثناء تحميل الطلبات.</p>";
+
+return;
+
+}
+
+
+if(!data || data.length === 0){
+
+container.innerHTML =
+"<p>لا توجد طلبات حتى الآن.</p>";
+
+return;
+
+}
+
+
+container.innerHTML =
+data.map(order => `
+
+<div class="card">
+
+<h3>
+📦 طلب جديد
+</h3>
+
+<p>
+👤 اسم المشتري:
+<strong>
+${order.buyer_name}
+</strong>
+</p>
+
+<p>
+📞 الهاتف:
+<strong>
+${order.buyer_phone}
+</strong>
+</p>
+
+<p>
+📍 العنوان:
+<strong>
+${order.buyer_address}
+</strong>
+</p>
+
+<p>
+🔢 الكمية:
+${order.quantity}
+</p>
+
+<p>
+💰 المجموع:
+<strong>
+${order.total_price} دج
+</strong>
+</p>
+
+<p>
+💸 العمولة:
+<strong>
+${order.commission} دج
+</strong>
+</p>
+
+<p>
+🕐 تاريخ الطلب:
+${new Date(order.created_at).toLocaleString("ar-DZ")}
+</p>
+
+</div>
+
+`).join("");
+
+   }
 /* =========================
    تشغيل الموقع
 ========================= */
